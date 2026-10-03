@@ -48,6 +48,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "openbsw-docan"
+version = "0.1.0"
+dependencies = [
+ "openbsw-async",
+ "openbsw-cpp2can",
+ "openbsw-timer",
+ "openbsw-transport",
+ "openbsw-util",
+]
+
+[[package]]
 name = "openbsw-lifecycle"
 version = "0.1.0"
 dependencies = [
@@ -76,6 +87,14 @@ name = "openbsw-timer"
 version = "0.1.0"
 
 [[package]]
+name = "openbsw-transport"
+version = "0.1.0"
+dependencies = [
+ "openbsw-timer",
+ "openbsw-util",
+]
+
+[[package]]
 name = "openbsw-util"
 version = "0.1.0"
 
@@ -92,10 +111,12 @@ dependencies = [
  "openbsw-bsp-zephyr",
  "openbsw-console",
  "openbsw-cpp2can",
+ "openbsw-docan",
  "openbsw-lifecycle",
  "openbsw-logger",
  "openbsw-runtime",
  "openbsw-timer",
+ "openbsw-transport",
  "openbsw-util",
  "openbsw-zephyr-ffi",
 ]

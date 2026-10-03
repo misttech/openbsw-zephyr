@@ -19,3 +19,13 @@ with the same behavior, test parity with the upstream tests, no new failure mode
    the same priorities, so the console output matches the C++ build line for line.
 5. **Host tests through hooks.** The glue crates are tested on the host by installing a
    `zephyr_ffi::host::Hooks` implementation that records the calls and answers them.
+6. **Stacks and optimization as the C++ build.** The Rust profiles optimize for size, as
+   Zephyr compiles the C++ demo (`-Os`), and the shim gives each task the stack
+   `main.cpp` gives it, so `stats stack` reads the same, with two exceptions measured in
+   Forkpoint: the CAN task has 2 KB instead of 1 KB, because the Rust DoCAN receive path
+   (frame decoding, the receiver's state machine, the router's buffer and its log line)
+   uses about 1.4 KB where the C++ uses 0.8 KB, and the background task has 2 KB instead
+   of 1 KB, because the `stats` command it runs uses about 1.1 KB. Measure before
+   changing a stack: run the firmware in Forkpoint with a debugger attached and read the
+   task's stack for the end of its `0xAA` fill (`CONFIG_INIT_STACKS`), or type
+   `stats stack` on the console.

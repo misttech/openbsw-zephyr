@@ -9,11 +9,13 @@ use openbsw_bsp_zephyr::ZephyrStdio;
 use openbsw_bsp_zephyr::system_timer::system_time_ns;
 use openbsw_console::CONSOLE;
 use openbsw_cpp2can::CAN;
+use openbsw_docan::DOCAN;
 use openbsw_lifecycle::LIFECYCLE;
 use openbsw_logger::{
     BufferedLoggerOutput, ComponentConfig, ComponentMapping, DefaultLoggerTime, LoggerComposition,
     MappingInfo,
 };
+use openbsw_transport::TPROUTER;
 use openbsw_util::format::{Color, StringAttributes};
 use openbsw_util::logger::{Level, LevelInfo, LoggerComponent};
 
@@ -25,12 +27,8 @@ pub static COMMON: LoggerComponent = LoggerComponent::new();
 pub static DEMO: LoggerComponent = LoggerComponent::new();
 /// The `GLOBAL` component, whose level gates all others.
 pub static GLOBAL: LoggerComponent = LoggerComponent::new();
-/// The `DOCAN` component.
-pub static DOCAN: LoggerComponent = LoggerComponent::new();
 /// The `UDS` component.
 pub static UDS: LoggerComponent = LoggerComponent::new();
-/// The `TPROUTER` component.
-pub static TPROUTER: LoggerComponent = LoggerComponent::new();
 
 const DEFAULT: StringAttributes = StringAttributes::color(Color::DefaultColor);
 

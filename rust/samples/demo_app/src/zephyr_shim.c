@@ -31,7 +31,11 @@
 #define TASK_COUNT 5
 
 K_THREAD_STACK_DEFINE(sysadmin_stack, 1024);
-K_THREAD_STACK_DEFINE(can_stack, 1024);
+/* The C++ demo gives the CAN task 1 KB. The Rust DoCAN receive path (frame decoding,
+ * the receiver's state machine, the router's buffer and its log line) needs about
+ * 1.4 KB of it where the C++ needs 0.8 KB, so this task gets 2 KB; `stats stack`
+ * shows the difference. */
+K_THREAD_STACK_DEFINE(can_stack, 2048);
 K_THREAD_STACK_DEFINE(demo_stack, 4 * 1024);
 K_THREAD_STACK_DEFINE(uds_stack, 2 * 1024);
 /* The C++ demo gives the background task 1 KB. The Rust `stats` command, which runs on
