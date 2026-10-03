@@ -24,3 +24,20 @@ pub const TASK_COUNT: usize = 5;
 
 /// The task names, in context order.
 pub const TASK_NAMES: [&CStr; TASK_COUNT] = [c"sysadmin", c"can", c"demo", c"uds", c"background"];
+
+/// The bus ids, from `busid/BusId.h`.
+pub mod busid {
+    /// The diagnostics bus.
+    pub const SELFDIAG: u8 = 1;
+    /// The CAN bus.
+    pub const CAN_0: u8 = 2;
+
+    /// The name of a bus, as `BusIdTraits::getName`.
+    pub const fn name(index: u8) -> &'static [u8] {
+        match index {
+            SELFDIAG => b"SELFDIAG",
+            CAN_0 => b"CAN_0",
+            _ => b"INVALID",
+        }
+    }
+}

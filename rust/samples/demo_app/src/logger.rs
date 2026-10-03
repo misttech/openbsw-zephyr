@@ -7,6 +7,7 @@
 use openbsw_async_zephyr::LockType;
 use openbsw_bsp_zephyr::ZephyrStdio;
 use openbsw_bsp_zephyr::system_timer::system_time_ns;
+use openbsw_cpp2can::CAN;
 use openbsw_lifecycle::LIFECYCLE;
 use openbsw_logger::{
     BufferedLoggerOutput, ComponentConfig, ComponentMapping, DefaultLoggerTime, LoggerComposition,
@@ -25,8 +26,6 @@ pub static DEMO: LoggerComponent = LoggerComponent::new();
 pub static GLOBAL: LoggerComponent = LoggerComponent::new();
 /// The `CONSOLE` component.
 pub static CONSOLE: LoggerComponent = LoggerComponent::new();
-/// The `CAN` component.
-pub static CAN: LoggerComponent = LoggerComponent::new();
 /// The `DOCAN` component.
 pub static DOCAN: LoggerComponent = LoggerComponent::new();
 /// The `UDS` component.

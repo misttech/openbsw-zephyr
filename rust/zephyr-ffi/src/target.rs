@@ -43,10 +43,11 @@ unsafe extern "C" {
     fn cpp_can_set_mode_normal() -> i32;
     fn cpp_can_start() -> i32;
     fn cpp_can_stop() -> i32;
-    fn cpp_can_add_rx_filter_all() -> i32;
+    fn cpp_can_add_rx_filter_all(user: *mut c_void) -> i32;
     fn cpp_can_remove_rx_filter(filter_id: i32);
     fn cpp_can_send(id: u32, extended: bool, dlc: u8, data: *const u8, user: *mut c_void) -> i32;
     fn cpp_can_get_state(state: *mut i32, tx_error_count: *mut u8, rx_error_count: *mut u8) -> i32;
+    fn cpp_can_bitrate() -> u32;
     fn cpp_pwm_set_led0(period_ns: u32, pulse_ns: u32) -> i32;
 }
 
@@ -209,9 +210,9 @@ pub(crate) fn can_stop() -> ZephyrResult {
     unsafe { cpp_can_stop() }
 }
 
-pub(crate) fn can_add_rx_filter_all() -> i32 {
-    // SAFETY: plain scalar call.
-    unsafe { cpp_can_add_rx_filter_all() }
+pub(crate) fn can_add_rx_filter_all(user: *mut c_void) -> i32 {
+    // SAFETY: a plain call; `user` is handed back to `rust_can_rx` unchanged.
+    unsafe { cpp_can_add_rx_filter_all(user) }
 }
 
 pub(crate) fn can_remove_rx_filter(filter_id: i32) {
@@ -234,6 +235,11 @@ pub(crate) fn can_get_state() -> Result<(i32, u8, u8), ZephyrResult> {
     // SAFETY: the three out-pointers outlive the call.
     let result = unsafe { cpp_can_get_state(&mut state, &mut tx_error_count, &mut rx_error_count) };
     if result == 0 { Ok((state, tx_error_count, rx_error_count)) } else { Err(result) }
+}
+
+pub(crate) fn can_bitrate() -> u32 {
+    // SAFETY: a plain call.
+    unsafe { cpp_can_bitrate() }
 }
 
 pub(crate) fn pwm_set_led0(period_ns: u32, pulse_ns: u32) -> ZephyrResult {

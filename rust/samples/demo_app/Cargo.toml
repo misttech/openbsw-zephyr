@@ -19,6 +19,7 @@ bench = false
 openbsw-async.workspace = true
 openbsw-async-zephyr.workspace = true
 openbsw-bsp-zephyr.workspace = true
+openbsw-cpp2can.workspace = true
 openbsw-lifecycle.workspace = true
 openbsw-logger.workspace = true
 openbsw-timer.workspace = true

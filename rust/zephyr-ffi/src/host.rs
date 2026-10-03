@@ -99,8 +99,8 @@ pub trait Hooks: Sync + Send {
     fn can_stop(&self) -> ZephyrResult {
         0
     }
-    /// A match-all filter was added; returns its id.
-    fn can_add_rx_filter_all(&self) -> i32 {
+    /// A match-all filter was added, with `user` for the receive callback; returns its id.
+    fn can_add_rx_filter_all(&self, _user: *mut c_void) -> i32 {
         0
     }
     /// A filter was removed.
@@ -118,6 +118,10 @@ pub trait Hooks: Sync + Send {
     /// The controller state.
     fn can_get_state(&self) -> Result<(i32, u8, u8), ZephyrResult> {
         Ok((0, 0, 0))
+    }
+    /// The bus bit rate.
+    fn can_bitrate(&self) -> u32 {
+        500_000
     }
     /// The LED PWM was set.
     fn pwm_set_led0(&self, _period_ns: u32, _pulse_ns: u32) -> ZephyrResult {
@@ -269,8 +273,8 @@ pub(crate) fn can_stop() -> ZephyrResult {
     hooks().can_stop()
 }
 
-pub(crate) fn can_add_rx_filter_all() -> i32 {
-    hooks().can_add_rx_filter_all()
+pub(crate) fn can_add_rx_filter_all(user: *mut c_void) -> i32 {
+    hooks().can_add_rx_filter_all(user)
 }
 
 pub(crate) fn can_remove_rx_filter(filter_id: i32) {
@@ -283,6 +287,10 @@ pub(crate) fn can_send(id: u32, extended: bool, data: &[u8], user: *mut c_void) 
 
 pub(crate) fn can_get_state() -> Result<(i32, u8, u8), ZephyrResult> {
     hooks().can_get_state()
+}
+
+pub(crate) fn can_bitrate() -> u32 {
+    hooks().can_bitrate()
 }
 
 pub(crate) fn pwm_set_led0(period_ns: u32, pulse_ns: u32) -> ZephyrResult {

@@ -5,16 +5,18 @@
 //!
 //! - [`system_timer`]: the clocks (`SystemTimer.cpp`).
 //! - [`ZephyrStdio`]: the console bytes (`Stdio.cpp`).
-//!
-//! The CAN transceiver follows with the `cpp2can` crate.
+//! - [`ZephyrCanTransceiver`]: the CAN controller (`ZephyrCanTransceiver.cpp`).
 
 #![no_std]
 #![deny(unsafe_op_in_unsafe_fn)]
 #![warn(missing_docs)]
 
+mod can;
 pub mod system_timer;
 
 use openbsw_util::stream::Stdio;
+
+pub use can::ZephyrCanTransceiver;
 
 /// The console through the shim's UART functions: the port of `Stdio.cpp`.
 pub struct ZephyrStdio;

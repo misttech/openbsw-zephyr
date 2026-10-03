@@ -20,6 +20,7 @@ openbsw-timer = { path = "../../openbsw/rust/timer" }
 openbsw-async = { path = "../../openbsw/rust/async" }
 openbsw-lifecycle = { path = "../../openbsw/rust/lifecycle" }
 openbsw-logger = { path = "../../openbsw/rust/logger" }
+openbsw-cpp2can = { path = "../../openbsw/rust/cpp2can" }
 openbsw-zephyr-ffi = { path = "zephyr-ffi" }
 openbsw-async-zephyr = { path = "async-zephyr" }
 openbsw-bsp-zephyr = { path = "bsp-zephyr" }
