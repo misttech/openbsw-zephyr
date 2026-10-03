@@ -1,13 +1,13 @@
 // Copyright 2026 Mist Tecnologia LTDA. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-//! The runtime statistics system, ported from `systems/RuntimeSystem.cpp`.
-//!
-//! The statistics command and the 1000 ms snapshot follow with the `runtime` crate; the
-//! transitions and the cyclic runnable are in place.
+//! The runtime statistics system, ported from `systems/RuntimeSystem.cpp`: owns the `stats`
+//! command's snapshot, taken every second.
 
 use openbsw_async::{ContextType, QueueNode, Runnable, TimeUnit, Timeout};
 use openbsw_lifecycle::{ComponentBase, LifecycleComponent};
+
+use crate::commands::statistics::StatisticsCommand;
 
 const SYSTEM_CYCLE_TIME: u32 = 1000;
 
@@ -16,16 +16,18 @@ pub struct RuntimeSystem {
     base: ComponentBase,
     context: ContextType,
     timeout: Timeout,
+    statistics_command: &'static StatisticsCommand,
     node: QueueNode<dyn Runnable>,
 }
 
 impl RuntimeSystem {
-    /// A runtime system running on `context`.
-    pub const fn new(context: ContextType) -> Self {
+    /// A runtime system running on `context`, feeding `statistics_command`.
+    pub const fn new(context: ContextType, statistics_command: &'static StatisticsCommand) -> Self {
         Self {
             base: ComponentBase::with_context(context),
             context,
             timeout: Timeout::new(),
+            statistics_command,
             node: QueueNode::new(),
         }
     }
@@ -37,6 +39,7 @@ impl LifecycleComponent for RuntimeSystem {
     }
 
     fn init(&'static self) {
+        self.statistics_command.set_ticks_per_us(zephyr_ffi::cycles_per_sec() / 1_000_000);
         self.transition_done();
     }
 
@@ -59,7 +62,7 @@ impl LifecycleComponent for RuntimeSystem {
 
 impl Runnable for RuntimeSystem {
     fn execute(&self) {
-        // StatisticsCommand::cyclic_1000ms follows with the runtime crate.
+        self.statistics_command.cyclic_1000ms();
     }
 
     fn node(&self) -> &QueueNode<dyn Runnable> {

@@ -21,6 +21,8 @@ openbsw-async = { path = "../../openbsw/rust/async" }
 openbsw-lifecycle = { path = "../../openbsw/rust/lifecycle" }
 openbsw-logger = { path = "../../openbsw/rust/logger" }
 openbsw-cpp2can = { path = "../../openbsw/rust/cpp2can" }
+openbsw-runtime = { path = "../../openbsw/rust/runtime" }
+openbsw-console = { path = "../../openbsw/rust/console" }
 openbsw-zephyr-ffi = { path = "zephyr-ffi" }
 openbsw-async-zephyr = { path = "async-zephyr" }
 openbsw-bsp-zephyr = { path = "bsp-zephyr" }
