@@ -16,6 +16,7 @@ use openbsw_logger::{
     MappingInfo,
 };
 use openbsw_transport::TPROUTER;
+use openbsw_uds::UDS;
 use openbsw_util::format::{Color, StringAttributes};
 use openbsw_util::logger::{Level, LevelInfo, LoggerComponent};
 
@@ -27,8 +28,6 @@ pub static COMMON: LoggerComponent = LoggerComponent::new();
 pub static DEMO: LoggerComponent = LoggerComponent::new();
 /// The `GLOBAL` component, whose level gates all others.
 pub static GLOBAL: LoggerComponent = LoggerComponent::new();
-/// The `UDS` component.
-pub static UDS: LoggerComponent = LoggerComponent::new();
 
 const DEFAULT: StringAttributes = StringAttributes::color(Color::DefaultColor);
 

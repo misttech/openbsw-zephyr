@@ -59,4 +59,6 @@ pub mod transport_configuration {
     pub const FUNCTIONAL_ALL_ISO14229: u16 = 0x00DF;
     /// The largest functional request (`MAX_FUNCTIONAL_MESSAGE_PAYLOAD_SIZE`).
     pub const MAX_FUNCTIONAL_MESSAGE_PAYLOAD_SIZE: u16 = 6;
+    /// The largest diagnostic message (`DIAG_PAYLOAD_SIZE`).
+    pub const DIAG_PAYLOAD_SIZE: u16 = 4095;
 }

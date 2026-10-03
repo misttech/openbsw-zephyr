@@ -30,7 +30,8 @@ use openbsw_util::log_info;
 use commands::lifecycle_control::LIFECYCLE_CONTROL_COMMAND;
 use commands::statistics::STATISTICS_COMMAND;
 use config::{
-    TASK_BACKGROUND, TASK_CAN, TASK_COUNT, TASK_DEMO, TASK_NAMES, TASK_SYSADMIN, TASK_UDS, busid,
+    LOGICAL_ADDRESS, TASK_BACKGROUND, TASK_CAN, TASK_COUNT, TASK_DEMO, TASK_NAMES, TASK_SYSADMIN,
+    TASK_UDS, busid,
 };
 use console::ASYNC_CONSOLE;
 use logger::DEMO;
@@ -85,7 +86,8 @@ static CAN_SYSTEM: CanSystem = CanSystem::new(TASK_CAN, &CAN_TRANSCEIVER0);
 static TRANSPORT_SYSTEM: TransportSystem = TransportSystem::new(&TRANSPORT_SYSTEM, TASK_UDS);
 static DOCAN_SYSTEM: DoCanSystem =
     DoCanSystem::new(&DOCAN_SYSTEM, &TRANSPORT_SYSTEM, &CAN_TRANSCEIVER0, TASK_CAN);
-static UDS_SYSTEM: UdsSystem = UdsSystem::new(TASK_UDS);
+static UDS_SYSTEM: UdsSystem =
+    UdsSystem::new(&UDS_SYSTEM, &TRANSPORT_SYSTEM, TASK_UDS, LOGICAL_ADDRESS);
 static DEMO_SYSTEM: DemoSystem = DemoSystem::new(TASK_DEMO, &CAN_SYSTEM);
 
 /// Remembers when level 0 is reached, so `main` can reset.
