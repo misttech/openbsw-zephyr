@@ -1,0 +1,20 @@
+# Copyright 2026 Mist Tecnologia LTDA. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+[package]
+# rust_app.cmake links librustapp.a, so the package is named rustapp.
+name = "rustapp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "OpenBSW's demo_app in Rust, as a Zephyr application"
+
+[lib]
+crate-type = ["staticlib"]
+test = false
+bench = false
+
+[dependencies]
+openbsw-util.workspace = true
+openbsw-zephyr-ffi.workspace = true
