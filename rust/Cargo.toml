@@ -6,7 +6,7 @@
 # Forkpoint's prebuilt/third_party/ lay them out. See README.md.
 [workspace]
 resolver = "3"
-members = ["zephyr-ffi", "samples/demo_app"]
+members = ["zephyr-ffi", "async-zephyr", "bsp-zephyr", "samples/demo_app"]
 
 [workspace.package]
 version = "0.1.0"
@@ -16,7 +16,13 @@ publish = false
 
 [workspace.dependencies]
 openbsw-util = { path = "../../openbsw/rust/util" }
+openbsw-timer = { path = "../../openbsw/rust/timer" }
+openbsw-async = { path = "../../openbsw/rust/async" }
+openbsw-lifecycle = { path = "../../openbsw/rust/lifecycle" }
+openbsw-logger = { path = "../../openbsw/rust/logger" }
 openbsw-zephyr-ffi = { path = "zephyr-ffi" }
+openbsw-async-zephyr = { path = "async-zephyr" }
+openbsw-bsp-zephyr = { path = "bsp-zephyr" }
 
 # The firmware builds optimized, as the C++ build does (-O2); keep debug info for the
 # ELF and panic = "abort" since there is no unwinder on the target.

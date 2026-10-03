@@ -3,6 +3,52 @@
 version = 4
 
 [[package]]
+name = "openbsw-async"
+version = "0.1.0"
+dependencies = [
+ "openbsw-timer",
+ "openbsw-util",
+]
+
+[[package]]
+name = "openbsw-async-zephyr"
+version = "0.1.0"
+dependencies = [
+ "openbsw-async",
+ "openbsw-timer",
+ "openbsw-util",
+ "openbsw-zephyr-ffi",
+]
+
+[[package]]
+name = "openbsw-bsp-zephyr"
+version = "0.1.0"
+dependencies = [
+ "openbsw-util",
+ "openbsw-zephyr-ffi",
+]
+
+[[package]]
+name = "openbsw-lifecycle"
+version = "0.1.0"
+dependencies = [
+ "openbsw-async",
+ "openbsw-util",
+]
+
+[[package]]
+name = "openbsw-logger"
+version = "0.1.0"
+dependencies = [
+ "openbsw-timer",
+ "openbsw-util",
+]
+
+[[package]]
+name = "openbsw-timer"
+version = "0.1.0"
+
+[[package]]
 name = "openbsw-util"
 version = "0.1.0"
 
@@ -14,6 +60,12 @@ version = "0.1.0"
 name = "rustapp"
 version = "0.1.0"
 dependencies = [
+ "openbsw-async",
+ "openbsw-async-zephyr",
+ "openbsw-bsp-zephyr",
+ "openbsw-lifecycle",
+ "openbsw-logger",
+ "openbsw-timer",
  "openbsw-util",
  "openbsw-zephyr-ffi",
 ]
