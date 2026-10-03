@@ -1,0 +1,17 @@
+# Copyright 2026 Mist Tecnologia LTDA. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+[package]
+name = "openbsw-bsp-zephyr"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Port of openbsw-zephyr's bspZephyr: the system timer, the console and the CAN transceiver over Zephyr"
+
+[lib]
+name = "openbsw_bsp_zephyr"
+
+[dependencies]
+openbsw-util.workspace = true
+openbsw-zephyr-ffi.workspace = true

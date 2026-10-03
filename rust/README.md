@@ -10,6 +10,8 @@ relative path: both trees are checked out side by side, as `west` and Forkpoint'
 | Directory | Contents |
 |---|---|
 | `zephyr-ffi/` | Rust's view of Zephyr: hand-written `extern "C"` declarations of the shim's functions, wrapped safely, with host stubs for tests |
+| `async-zephyr/` | Port of `libs/asyncZephyr`: `TaskContext` (one async context on one thread, with its event object and one-shot timer), `ZephyrAdapter` (the platform binding), the `irq_lock` critical section, and the tracing hooks |
+| `bsp-zephyr/` | Port of `libs/bspZephyr`: the system timer and the console `Stdio` |
 | `cmake/` | `openbsw_rust_application()`, which builds the Cargo package of a Zephyr application and links it, and the C `main` that calls `rust_main()` |
 | `samples/demo_app/` | The demo application: a Zephyr app whose only C file is `src/zephyr_shim.c` |
 
