@@ -48,6 +48,15 @@ pub const CAN_MAX_DLEN: usize = 8;
 /// Invalid argument.
 pub const EINVAL: i32 = 22;
 
+/// Zephyr's `EAGAIN`: the controller's queue is full.
+pub const EAGAIN: i32 = 11;
+/// Zephyr's `ENOSPC`: no filter slot is left.
+pub const ENOSPC: i32 = 28;
+/// Zephyr's `ENOTSUP`: the filter is not supported.
+pub const ENOTSUP: i32 = 134;
+/// Zephyr's `CAN_STATE_BUS_OFF` in `enum can_state`, as [`can_get_state`] reports it.
+pub const CAN_STATE_BUS_OFF: i32 = 3;
+
 /// Create the thread of async context `context` (not started): `name`, Zephyr
 /// `priority`, running `entry(arg)`. The shim owns the stack and control block.
 pub fn task_create(
@@ -203,10 +212,11 @@ pub fn can_stop() -> ZephyrResult {
     imp::can_stop()
 }
 
-/// Add a receive filter matching every frame; received frames reach `rust_can_rx`.
-/// Returns the filter id, or a negative errno.
-pub fn can_add_rx_filter_all() -> i32 {
-    imp::can_add_rx_filter_all()
+/// Add a receive filter matching every frame; received frames reach
+/// `rust_can_rx(id, extended, length, data, user)`. Returns the filter id, or a negative
+/// errno.
+pub fn can_add_rx_filter_all(user: *mut c_void) -> i32 {
+    imp::can_add_rx_filter_all(user)
 }
 
 /// Remove the receive filter `filter_id`.
@@ -227,6 +237,11 @@ pub fn can_send(id: u32, extended: bool, data: &[u8], user: *mut c_void) -> Zeph
 /// The controller state and error counters: `(state, tx_error_count, rx_error_count)`.
 pub fn can_get_state() -> Result<(i32, u8, u8), ZephyrResult> {
     imp::can_get_state()
+}
+
+/// The CAN bus bit rate the Device Tree gives the chosen controller.
+pub fn can_bitrate() -> u32 {
+    imp::can_bitrate()
 }
 
 /// Set the LED's PWM period and pulse, in nanoseconds.

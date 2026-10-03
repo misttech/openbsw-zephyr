@@ -232,9 +232,9 @@ static void rx_callback(const struct device *dev, struct can_frame *frame, void 
 	rust_can_rx(frame->id, (frame->flags & CAN_FRAME_IDE) != 0, frame->dlc, frame->data, user);
 }
 
-int32_t cpp_can_add_rx_filter_all(void)
+int32_t cpp_can_add_rx_filter_all(void *user)
 {
-	return can_add_rx_filter(can_dev, rx_callback, NULL, &match_all_filter);
+	return can_add_rx_filter(can_dev, rx_callback, user, &match_all_filter);
 }
 
 void cpp_can_remove_rx_filter(int32_t filter_id) { can_remove_rx_filter(can_dev, filter_id); }
@@ -257,6 +257,14 @@ int32_t cpp_can_send(uint32_t id, bool extended, uint8_t dlc, const uint8_t *dat
 	frame.dlc = dlc;
 	memcpy(frame.data, data, dlc);
 	return can_send(can_dev, &frame, K_NO_WAIT, tx_callback, user);
+}
+
+// The bit rate CanSystem.cpp reads from the Device Tree: `bitrate`, else the older
+// `bus-speed`, else the Kconfig default.
+uint32_t cpp_can_bitrate(void)
+{
+	return DT_PROP_OR(DT_CHOSEN(zephyr_canbus), bitrate,
+			  DT_PROP_OR(DT_CHOSEN(zephyr_canbus), bus_speed, CONFIG_CAN_DEFAULT_BITRATE));
 }
 
 int32_t cpp_can_get_state(int32_t *state, uint8_t *tx_error_count, uint8_t *rx_error_count)

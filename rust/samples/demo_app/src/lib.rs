@@ -4,8 +4,9 @@
 //! OpenBSW's `demo_app` in Rust: the port of `samples/demo_app/src/main.cpp`.
 //!
 //! The lifecycle manager brings the systems up one run level at a time on their async
-//! contexts, which are Zephyr threads; a 1000 ms runnable logs the context it runs on, and
-//! a 10 ms runnable drains the log onto the console.
+//! contexts, which are Zephyr threads; the CAN system opens the bus and the demo system
+//! sends a frame a second; a 1000 ms runnable logs the context it runs on, and a 10 ms
+//! runnable drains the log onto the console.
 
 #![no_std]
 #![deny(unsafe_op_in_unsafe_fn)]
@@ -16,13 +17,14 @@ mod systems;
 
 use openbsw_async::{QueueNode, Runnable, TimeUnit, Timeout};
 use openbsw_async_zephyr::{LockType, TaskContext, ZephyrAdapter};
+use openbsw_bsp_zephyr::ZephyrCanTransceiver;
 use openbsw_bsp_zephyr::system_timer::system_time_us32;
 use openbsw_lifecycle::{LIFECYCLE, LifecycleListener, LifecycleManager, ListenerNode, Transition};
 use openbsw_util::log_debug;
 use openbsw_util::log_info;
 
 use config::{
-    TASK_BACKGROUND, TASK_CAN, TASK_COUNT, TASK_DEMO, TASK_NAMES, TASK_SYSADMIN, TASK_UDS,
+    TASK_BACKGROUND, TASK_CAN, TASK_COUNT, TASK_DEMO, TASK_NAMES, TASK_SYSADMIN, TASK_UDS, busid,
 };
 use logger::DEMO;
 use systems::can::CanSystem;
@@ -55,11 +57,13 @@ static LIFECYCLE_MANAGER: LifecycleManager<
 
 static RUNTIME_SYSTEM: RuntimeSystem = RuntimeSystem::new(TASK_BACKGROUND);
 static SYS_ADMIN_SYSTEM: SysAdminSystem = SysAdminSystem::new(TASK_SYSADMIN);
-static CAN_SYSTEM: CanSystem = CanSystem::new(TASK_CAN);
+static CAN_TRANSCEIVER0: ZephyrCanTransceiver =
+    ZephyrCanTransceiver::new(&CAN_TRANSCEIVER0, TASK_CAN, busid::CAN_0, busid::name(busid::CAN_0));
+static CAN_SYSTEM: CanSystem = CanSystem::new(TASK_CAN, &CAN_TRANSCEIVER0);
 static TRANSPORT_SYSTEM: TransportSystem = TransportSystem::new(TASK_UDS);
 static DOCAN_SYSTEM: DoCanSystem = DoCanSystem::new(TASK_CAN);
 static UDS_SYSTEM: UdsSystem = UdsSystem::new(TASK_UDS);
-static DEMO_SYSTEM: DemoSystem = DemoSystem::new(TASK_DEMO);
+static DEMO_SYSTEM: DemoSystem = DemoSystem::new(TASK_DEMO, &CAN_SYSTEM);
 
 /// Remembers when level 0 is reached, so `main` can reset.
 struct LifecycleMonitor {
