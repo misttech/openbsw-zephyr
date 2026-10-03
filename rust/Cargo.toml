@@ -23,20 +23,24 @@ openbsw-logger = { path = "../../openbsw/rust/logger" }
 openbsw-cpp2can = { path = "../../openbsw/rust/cpp2can" }
 openbsw-runtime = { path = "../../openbsw/rust/runtime" }
 openbsw-console = { path = "../../openbsw/rust/console" }
+openbsw-transport = { path = "../../openbsw/rust/transport" }
+openbsw-docan = { path = "../../openbsw/rust/docan" }
 openbsw-zephyr-ffi = { path = "zephyr-ffi" }
 openbsw-async-zephyr = { path = "async-zephyr" }
 openbsw-bsp-zephyr = { path = "bsp-zephyr" }
 
-# The firmware builds optimized, as the C++ build does (-O2); keep debug info for the
-# ELF and panic = "abort" since there is no unwinder on the target.
+# The firmware optimizes for size, as Zephyr compiles the C++ demo (-Os through
+# CONFIG_SIZE_OPTIMIZATIONS), which also keeps the tasks' stack frames closest to the
+# C++ ones. Keep debug info for the ELF and panic = "abort" since there is no unwinder
+# on the target.
 [profile.dev]
 panic = "abort"
-opt-level = 2
+opt-level = "s"
 debug = true
 codegen-units = 1
 
 [profile.release]
 panic = "abort"
-opt-level = 2
+opt-level = "s"
 debug = true
 codegen-units = 1

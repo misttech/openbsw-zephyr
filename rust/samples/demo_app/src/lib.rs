@@ -82,8 +82,9 @@ static SYS_ADMIN_SYSTEM: SysAdminSystem = SysAdminSystem::new(TASK_SYSADMIN);
 static CAN_TRANSCEIVER0: ZephyrCanTransceiver =
     ZephyrCanTransceiver::new(&CAN_TRANSCEIVER0, TASK_CAN, busid::CAN_0, busid::name(busid::CAN_0));
 static CAN_SYSTEM: CanSystem = CanSystem::new(TASK_CAN, &CAN_TRANSCEIVER0);
-static TRANSPORT_SYSTEM: TransportSystem = TransportSystem::new(TASK_UDS);
-static DOCAN_SYSTEM: DoCanSystem = DoCanSystem::new(TASK_CAN);
+static TRANSPORT_SYSTEM: TransportSystem = TransportSystem::new(&TRANSPORT_SYSTEM, TASK_UDS);
+static DOCAN_SYSTEM: DoCanSystem =
+    DoCanSystem::new(&DOCAN_SYSTEM, &TRANSPORT_SYSTEM, &CAN_TRANSCEIVER0, TASK_CAN);
 static UDS_SYSTEM: UdsSystem = UdsSystem::new(TASK_UDS);
 static DEMO_SYSTEM: DemoSystem = DemoSystem::new(TASK_DEMO, &CAN_SYSTEM);
 
@@ -169,6 +170,8 @@ pub extern "C" fn rust_main() {
     ASYNC_CONSOLE.add_command(&STATISTICS_WRAPPER);
     ASYNC_CONSOLE.add_command(&LIFECYCLE_CONTROL_WRAPPER);
     runtime_monitor::init();
+    // The C++ `BusIdTraits::getName` is a global; the transport crate asks for it.
+    openbsw_transport::set_bus_name_resolver(&busid::name);
     openbsw_async::set_binding(&ASYNC_ADAPTER);
     ASYNC_ADAPTER.init();
     LIFECYCLE_MANAGER.add_lifecycle_listener(&LIFECYCLE_MONITOR);

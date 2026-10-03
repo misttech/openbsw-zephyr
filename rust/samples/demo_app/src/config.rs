@@ -1,9 +1,9 @@
 // Copyright 2026 Mist Tecnologia LTDA. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-//! The application's task configuration, ported from `openbswConfig`'s `async/Config.h`
-//! and the thread names of `main.cpp`. The bus ids and the UDS address follow with the
-//! systems that use them.
+//! The application's configuration, ported from `openbswConfig`'s `async/Config.h`, the
+//! thread names of `main.cpp`, `app/appConfig.h`, `busid/BusId.h` and
+//! `transport/TransportConfiguration.h`.
 
 use core::ffi::CStr;
 
@@ -48,4 +48,15 @@ pub mod busid {
             _ => b"INVALID",
         }
     }
+}
+
+/// This ECU's diagnostic address (`app/appConfig.h`).
+pub const LOGICAL_ADDRESS: u16 = 0x002A;
+
+/// The transport addresses and sizes of `TransportConfiguration.h`.
+pub mod transport_configuration {
+    /// The functional address every ECU answers (`FUNCTIONAL_ALL_ISO14229`).
+    pub const FUNCTIONAL_ALL_ISO14229: u16 = 0x00DF;
+    /// The largest functional request (`MAX_FUNCTIONAL_MESSAGE_PAYLOAD_SIZE`).
+    pub const MAX_FUNCTIONAL_MESSAGE_PAYLOAD_SIZE: u16 = 6;
 }
