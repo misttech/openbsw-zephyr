@@ -34,7 +34,10 @@ K_THREAD_STACK_DEFINE(sysadmin_stack, 1024);
 K_THREAD_STACK_DEFINE(can_stack, 1024);
 K_THREAD_STACK_DEFINE(demo_stack, 4 * 1024);
 K_THREAD_STACK_DEFINE(uds_stack, 2 * 1024);
-K_THREAD_STACK_DEFINE(background_stack, 1024);
+/* The C++ demo gives the background task 1 KB. The Rust `stats` command, which runs on
+ * it, prints its table through a deeper call chain and uses about 1.1 KB, so this task
+ * gets 2 KB; `stats stack` shows the difference. */
+K_THREAD_STACK_DEFINE(background_stack, 2048);
 
 static k_thread_stack_t *const stacks[TASK_COUNT] = {
 	sysadmin_stack, can_stack, demo_stack, uds_stack, background_stack,
@@ -293,10 +296,56 @@ int32_t cpp_pwm_set_led0(uint32_t period_ns, uint32_t pulse_ns)
 #endif
 
 // Tracing hooks: the kernel's weak symbols are overridden only from an application
-// object, so they live here and forward to Rust (as TraceHooks.cpp does). Every
-// interrupt on this board counts toward ISR group 0, "test".
+// object, so they live here and forward to Rust (as TraceHooks.cpp does). On the
+// S32K1 series the FlexCAN interrupts count toward the "can" group and, with
+// networking, the ENET MAC's toward "ethernet"; every other interrupt, and every
+// interrupt on the other SoCs (the NUCLEO-G474RE among them), counts toward "test".
 
 #define ISR_GROUP_TEST 0
+#define ISR_GROUP_CAN 1
+#define ISR_GROUP_ETHERNET 2
+
+#if defined(CONFIG_SOC_SERIES_S32K1)
+#define FLEXCAN_NODE DT_NODELABEL(flexcan0)
+static const int32_t can_irq_nums[] = {
+	DT_IRQ_BY_IDX(FLEXCAN_NODE, 0, irq), DT_IRQ_BY_IDX(FLEXCAN_NODE, 1, irq),
+	DT_IRQ_BY_IDX(FLEXCAN_NODE, 2, irq), DT_IRQ_BY_IDX(FLEXCAN_NODE, 3, irq),
+	DT_IRQ_BY_IDX(FLEXCAN_NODE, 4, irq),
+};
+#if defined(CONFIG_NETWORKING)
+#define ENET_MAC_NODE DT_NODELABEL(enet_mac)
+static const int32_t enet_mac_irq_nums[] = {
+	DT_IRQ_BY_IDX(ENET_MAC_NODE, 0, irq),
+	DT_IRQ_BY_IDX(ENET_MAC_NODE, 1, irq),
+	DT_IRQ_BY_IDX(ENET_MAC_NODE, 2, irq),
+};
+#endif
+
+static uint32_t isr_group_of_active_irq(void)
+{
+#if defined(CONFIG_ARM_CUSTOM_INTERRUPT_CONTROLLER)
+	int32_t irq = z_soc_irq_get_active();
+#else
+	int32_t irq = (int32_t)__get_IPSR();
+#endif
+	irq -= 16;
+	for (size_t i = 0; i < ARRAY_SIZE(can_irq_nums); i++) {
+		if (irq == can_irq_nums[i]) {
+			return ISR_GROUP_CAN;
+		}
+	}
+#if defined(CONFIG_NETWORKING)
+	for (size_t i = 0; i < ARRAY_SIZE(enet_mac_irq_nums); i++) {
+		if (irq == enet_mac_irq_nums[i]) {
+			return ISR_GROUP_ETHERNET;
+		}
+	}
+#endif
+	return ISR_GROUP_TEST;
+}
+#else
+static uint32_t isr_group_of_active_irq(void) { return ISR_GROUP_TEST; }
+#endif
 
 void sys_trace_thread_switched_in_user(void)
 {
@@ -323,7 +372,7 @@ void sys_trace_isr_enter_user(void)
 	if (!application_initialized) {
 		return;
 	}
-	rust_async_enter_isr_group(ISR_GROUP_TEST);
+	rust_async_enter_isr_group(isr_group_of_active_irq());
 }
 
 void sys_trace_isr_exit_user(void)
@@ -331,5 +380,5 @@ void sys_trace_isr_exit_user(void)
 	if (!application_initialized) {
 		return;
 	}
-	rust_async_leave_isr_group(ISR_GROUP_TEST);
+	rust_async_leave_isr_group(isr_group_of_active_irq());
 }

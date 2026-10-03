@@ -1,8 +1,8 @@
 // Copyright 2026 Mist Tecnologia LTDA. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-//! The system administration system, ported from `systems/SysAdminSystem.cpp`. The `lc`
-//! console command follows with the `console` crate.
+//! The system administration system, ported from `systems/SysAdminSystem.cpp`. It owns the
+//! `lc` console command, which `main` registers; its 10 ms cycle does nothing.
 
 use openbsw_async::{ContextType, QueueNode, Runnable, TimeUnit, Timeout};
 use openbsw_lifecycle::{ComponentBase, LifecycleComponent};

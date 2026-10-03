@@ -25,6 +25,14 @@ pub const TASK_COUNT: usize = 5;
 /// The task names, in context order.
 pub const TASK_NAMES: [&CStr; TASK_COUNT] = [c"sysadmin", c"can", c"demo", c"uds", c"background"];
 
+/// The number of interrupt groups (`ISR_GROUP_COUNT`: test, can, ethernet).
+pub const ISR_GROUP_COUNT: usize = 3;
+/// The interrupt group names, as `main.cpp` names them: "ethernet" only with
+/// `PLATFORM_SUPPORT_ETHERNET`, which the demo's CMake file defines for
+/// `CONFIG_NETWORKING`. This application has no networking, so the ethernet group is
+/// unnamed and `stats cpu` leaves it out, as the C++ does.
+pub const ISR_GROUP_NAMES: [Option<&[u8]>; ISR_GROUP_COUNT] = [Some(b"test"), Some(b"can"), None];
+
 /// The bus ids, from `busid/BusId.h`.
 pub mod busid {
     /// The diagnostics bus.

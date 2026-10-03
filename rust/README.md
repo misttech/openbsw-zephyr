@@ -13,7 +13,7 @@ relative path: both trees are checked out side by side, as `west` and Forkpoint'
 | `async-zephyr/` | Port of `libs/asyncZephyr`: `TaskContext` (one async context on one thread, with its event object and one-shot timer), `ZephyrAdapter` (the platform binding), the `irq_lock` critical section, and the tracing hooks |
 | `bsp-zephyr/` | Port of `libs/bspZephyr`: the system timer, the console `Stdio` and `ZephyrCanTransceiver` over Zephyr's CAN API |
 | `cmake/` | `openbsw_rust_application()`, which builds the Cargo package of a Zephyr application and links it, and the C `main` that calls `rust_main()` |
-| `samples/demo_app/` | The demo application: a Zephyr app whose only C file is `src/zephyr_shim.c` |
+| `samples/demo_app/` | The demo application: a Zephyr app whose only C file is `src/zephyr_shim.c`; `src/commands/` holds the `stats` and `lc` console commands of `openbswConfig/lifecycleSupport` |
 
 ## No bindings
 

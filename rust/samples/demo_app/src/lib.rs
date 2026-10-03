@@ -11,22 +11,30 @@
 #![no_std]
 #![deny(unsafe_op_in_unsafe_fn)]
 
+mod commands;
 mod config;
+mod console;
 mod logger;
+mod runtime_monitor;
 mod systems;
 
 use openbsw_async::{QueueNode, Runnable, TimeUnit, Timeout};
 use openbsw_async_zephyr::{LockType, TaskContext, ZephyrAdapter};
 use openbsw_bsp_zephyr::ZephyrCanTransceiver;
 use openbsw_bsp_zephyr::system_timer::system_time_us32;
+use openbsw_console::AsyncCommandWrapper;
 use openbsw_lifecycle::{LIFECYCLE, LifecycleListener, LifecycleManager, ListenerNode, Transition};
 use openbsw_util::log_debug;
 use openbsw_util::log_info;
 
+use commands::lifecycle_control::LIFECYCLE_CONTROL_COMMAND;
+use commands::statistics::STATISTICS_COMMAND;
 use config::{
     TASK_BACKGROUND, TASK_CAN, TASK_COUNT, TASK_DEMO, TASK_NAMES, TASK_SYSADMIN, TASK_UDS, busid,
 };
+use console::ASYNC_CONSOLE;
 use logger::DEMO;
+use runtime_monitor::RUNTIME_MONITOR;
 use systems::can::CanSystem;
 use systems::demo::DemoSystem;
 use systems::docan::DoCanSystem;
@@ -55,7 +63,21 @@ static LIFECYCLE_MANAGER: LifecycleManager<
     LockType,
 > = LifecycleManager::new(TASK_SYSADMIN, &system_time_us32);
 
-static RUNTIME_SYSTEM: RuntimeSystem = RuntimeSystem::new(TASK_BACKGROUND);
+static RUNTIME_SYSTEM: RuntimeSystem = RuntimeSystem::new(TASK_BACKGROUND, &STATISTICS_COMMAND);
+/// `_asyncCommandWrapper_for_statisticsCommand`: `stats` runs on the background context.
+static STATISTICS_WRAPPER: AsyncCommandWrapper = AsyncCommandWrapper::new(
+    &STATISTICS_WRAPPER,
+    &ASYNC_CONSOLE,
+    STATISTICS_COMMAND.command(),
+    TASK_BACKGROUND,
+);
+/// `_asyncCommandWrapper_for_lifecycleControlCommand`: `lc` runs on the sysadmin context.
+static LIFECYCLE_CONTROL_WRAPPER: AsyncCommandWrapper = AsyncCommandWrapper::new(
+    &LIFECYCLE_CONTROL_WRAPPER,
+    &ASYNC_CONSOLE,
+    &LIFECYCLE_CONTROL_COMMAND,
+    TASK_SYSADMIN,
+);
 static SYS_ADMIN_SYSTEM: SysAdminSystem = SysAdminSystem::new(TASK_SYSADMIN);
 static CAN_TRANSCEIVER0: ZephyrCanTransceiver =
     ZephyrCanTransceiver::new(&CAN_TRANSCEIVER0, TASK_CAN, busid::CAN_0, busid::name(busid::CAN_0));
@@ -117,6 +139,7 @@ struct DemoRunnable2(QueueNode<dyn Runnable>);
 impl Runnable for DemoRunnable2 {
     fn execute(&self) {
         logger::run();
+        console::run();
     }
 
     fn node(&self) -> &QueueNode<dyn Runnable> {
@@ -139,6 +162,13 @@ fn static_shutdown() -> ! {
 #[unsafe(no_mangle)]
 pub extern "C" fn rust_main() {
     logger::init();
+    console::init();
+    console::enable();
+    // The C++ wrappers register themselves when constructed; here the systems' commands
+    // are registered next to them.
+    ASYNC_CONSOLE.add_command(&STATISTICS_WRAPPER);
+    ASYNC_CONSOLE.add_command(&LIFECYCLE_CONTROL_WRAPPER);
+    runtime_monitor::init();
     openbsw_async::set_binding(&ASYNC_ADAPTER);
     ASYNC_ADAPTER.init();
     LIFECYCLE_MANAGER.add_lifecycle_listener(&LIFECYCLE_MONITOR);
@@ -150,6 +180,7 @@ pub extern "C" fn rust_main() {
     LIFECYCLE_MANAGER.add_component(b"sysadmin", &SYS_ADMIN_SYSTEM, 7);
     LIFECYCLE_MANAGER.add_component(b"demo", &DEMO_SYSTEM, 8);
     LIFECYCLE_MANAGER.transition_to_level(MAX_NUM_LEVELS as u8);
+    RUNTIME_MONITOR.start();
     ASYNC_ADAPTER.run();
     openbsw_async::schedule_at_fixed_rate(
         TASK_SYSADMIN,

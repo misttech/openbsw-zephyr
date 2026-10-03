@@ -32,6 +32,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "openbsw-console"
+version = "0.1.0"
+dependencies = [
+ "openbsw-async",
+ "openbsw-util",
+]
+
+[[package]]
 name = "openbsw-cpp2can"
 version = "0.1.0"
 dependencies = [
@@ -49,6 +57,14 @@ dependencies = [
 
 [[package]]
 name = "openbsw-logger"
+version = "0.1.0"
+dependencies = [
+ "openbsw-timer",
+ "openbsw-util",
+]
+
+[[package]]
+name = "openbsw-runtime"
 version = "0.1.0"
 dependencies = [
  "openbsw-timer",
@@ -74,9 +90,11 @@ dependencies = [
  "openbsw-async",
  "openbsw-async-zephyr",
  "openbsw-bsp-zephyr",
+ "openbsw-console",
  "openbsw-cpp2can",
  "openbsw-lifecycle",
  "openbsw-logger",
+ "openbsw-runtime",
  "openbsw-timer",
  "openbsw-util",
  "openbsw-zephyr-ffi",
