@@ -1,0 +1,15 @@
+# Copyright 2026 Mist Tecnologia LTDA. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+[package]
+name = "openbsw-zephyr-ffi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Hand-written FFI to the Zephyr kernel and drivers through the demo's C shim, with host stubs"
+
+[lib]
+name = "zephyr_ffi"
+
+[dependencies]

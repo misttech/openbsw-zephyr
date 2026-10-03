@@ -1,0 +1,21 @@
+# Porting the Zephyr adaptation
+
+The rules of `openbsw/rust/PORTING.md` apply: a direct translation of each C++ class
+with the same behavior, test parity with the upstream tests, no new failure modes,
+`// SAFETY:` on every `unsafe`. On top of them:
+
+1. **Zephyr through the shim only.** Rust calls Zephyr through `zephyr_ffi`, whose
+   functions the shim implements. A new Zephyr call is one `cpp_` function in
+   `zephyr_shim.c` (declarative: marshal the arguments, make the call), one `extern "C"`
+   declaration and one safe wrapper in `zephyr-ffi/src/target.rs`, one method with a
+   neutral default in `zephyr-ffi/src/host.rs`'s `Hooks`, and one entry in `lib.rs`.
+2. **Callbacks are `rust_` functions.** Zephyr calls into Rust only through
+   `#[unsafe(no_mangle)] extern "C"` functions named `rust_*`, which the shim declares
+   and gives weak fallbacks so that a partial application still links.
+3. **Kernel objects live in C.** Thread stacks, control blocks, events and timers are
+   statics in the shim, indexed by async context; Rust never sees their layout.
+4. **Scheduling order is the contract.** `TaskContext` and `ZephyrAdapter` are mirrored
+   one to one: the same event bits, the same order of handling runnables and timeouts,
+   the same priorities, so the console output matches the C++ build line for line.
+5. **Host tests through hooks.** The glue crates are tested on the host by installing a
+   `zephyr_ffi::host::Hooks` implementation that records the calls and answers them.
