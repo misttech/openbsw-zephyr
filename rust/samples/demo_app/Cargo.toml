@@ -27,5 +27,6 @@ openbsw-logger.workspace = true
 openbsw-runtime.workspace = true
 openbsw-timer.workspace = true
 openbsw-transport.workspace = true
+openbsw-uds.workspace = true
 openbsw-util.workspace = true
 openbsw-zephyr-ffi.workspace = true

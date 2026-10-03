@@ -25,6 +25,7 @@ openbsw-runtime = { path = "../../openbsw/rust/runtime" }
 openbsw-console = { path = "../../openbsw/rust/console" }
 openbsw-transport = { path = "../../openbsw/rust/transport" }
 openbsw-docan = { path = "../../openbsw/rust/docan" }
+openbsw-uds = { path = "../../openbsw/rust/uds" }
 openbsw-zephyr-ffi = { path = "zephyr-ffi" }
 openbsw-async-zephyr = { path = "async-zephyr" }
 openbsw-bsp-zephyr = { path = "bsp-zephyr" }
