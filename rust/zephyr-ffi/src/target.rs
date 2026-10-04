@@ -24,13 +24,16 @@ unsafe extern "C" {
     fn cpp_event_clear(context: u32, mask: u32);
     fn cpp_timer_start_us(context: u32, microseconds: u32);
     fn cpp_timer_stop(context: u32);
+    #[cfg(not(zephyr_basepri))]
     fn cpp_irq_lock() -> u32;
+    #[cfg(not(zephyr_basepri))]
     fn cpp_irq_unlock(key: u32);
     fn cpp_is_in_isr() -> bool;
     fn cpp_current_priority() -> i32;
     fn cpp_sched_current_priority() -> i32;
     fn cpp_msleep(milliseconds: i32) -> i32;
     fn cpp_reboot_cold() -> !;
+    fn cpp_cycle_get_32() -> u32;
     fn cpp_cycle_get_64() -> u64;
     fn cpp_cyc_to_us_floor32(cycles: u64) -> u32;
     fn cpp_cyc_to_us_floor64(cycles: u64) -> u64;
@@ -115,11 +118,55 @@ pub(crate) fn timer_stop(context: u32) {
     unsafe { cpp_timer_stop(context) }
 }
 
+/// The BASEPRI value Zephyr's `irq_lock` raises to, `_EXC_IRQ_DEFAULT_PRIO`; the shim's
+/// `BUILD_ASSERT` keeps the two equal.
+#[cfg(zephyr_basepri)]
+const IRQ_LOCK_BASEPRI: u32 = 0x10;
+
+/// Zephyr's `arch_irq_lock` for ARMv7-M and ARMv8-M Mainline, inlined: the lock runs on
+/// every context switch and around every timer and queue update, and a call into the shim
+/// for it cost more than the work it guards.
+#[cfg(zephyr_basepri)]
+#[inline(always)]
+pub(crate) fn irq_lock() -> u32 {
+    let key: u32;
+    // SAFETY: the same instructions as Zephyr's `arch_irq_lock`. BASEPRI_MAX only raises
+    // the mask, and the asm is a compiler barrier for memory (no `nomem`).
+    unsafe {
+        core::arch::asm!(
+            "mrs {key}, BASEPRI",
+            "msr BASEPRI_MAX, {prio}",
+            "isb",
+            key = out(reg) key,
+            prio = in(reg) IRQ_LOCK_BASEPRI,
+            options(nostack, preserves_flags),
+        );
+    }
+    key
+}
+
+/// Zephyr's `arch_irq_unlock` for ARMv7-M and ARMv8-M Mainline, inlined.
+#[cfg(zephyr_basepri)]
+#[inline(always)]
+pub(crate) fn irq_unlock(key: u32) {
+    // SAFETY: restores the BASEPRI value `irq_lock` returned, as `arch_irq_unlock` does.
+    unsafe {
+        core::arch::asm!(
+            "msr BASEPRI, {key}",
+            "isb",
+            key = in(reg) key,
+            options(nostack, preserves_flags),
+        );
+    }
+}
+
+#[cfg(not(zephyr_basepri))]
 pub(crate) fn irq_lock() -> u32 {
     // SAFETY: plain scalar call.
     unsafe { cpp_irq_lock() }
 }
 
+#[cfg(not(zephyr_basepri))]
 pub(crate) fn irq_unlock(key: u32) {
     // SAFETY: plain scalar call.
     unsafe { cpp_irq_unlock(key) }
@@ -148,6 +195,11 @@ pub(crate) fn msleep(milliseconds: i32) {
 pub(crate) fn reboot_cold() -> ! {
     // SAFETY: plain call that does not return.
     unsafe { cpp_reboot_cold() }
+}
+
+pub(crate) fn cycle_get_32() -> u32 {
+    // SAFETY: plain scalar call.
+    unsafe { cpp_cycle_get_32() }
 }
 
 pub(crate) fn cycle_get_64() -> u64 {

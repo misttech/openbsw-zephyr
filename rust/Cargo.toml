@@ -30,18 +30,20 @@ openbsw-zephyr-ffi = { path = "zephyr-ffi" }
 openbsw-async-zephyr = { path = "async-zephyr" }
 openbsw-bsp-zephyr = { path = "bsp-zephyr" }
 
-# The firmware optimizes for size, as Zephyr compiles the C++ demo (-Os through
-# CONFIG_SIZE_OPTIMIZATIONS), which also keeps the tasks' stack frames closest to the
-# C++ ones. Keep debug info for the ELF and panic = "abort" since there is no unwinder
-# on the target.
+# The firmware optimizes for speed, as OpenBSW's CMake builds its C++ libraries (-O2,
+# over Zephyr's -Os). Fat LTO stands in for the C++ headers inlined across libraries: the
+# hot paths (locks, timers, the context-switch hooks) cross crates. See PORTING.md. Keep
+# debug info for the ELF and panic = "abort" since there is no unwinder on the target.
 [profile.dev]
 panic = "abort"
-opt-level = "s"
+opt-level = 3
 debug = true
 codegen-units = 1
+lto = "fat"
 
 [profile.release]
 panic = "abort"
-opt-level = "s"
+opt-level = 3
 debug = true
 codegen-units = 1
+lto = "fat"

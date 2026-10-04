@@ -7,13 +7,26 @@
 use openbsw_async::Async;
 use openbsw_async_zephyr::{ContextHook, LockType, set_context_hook};
 use openbsw_bsp_zephyr::system_timer::system_ticks32;
-use openbsw_runtime::{ContextEntry, RuntimeMonitor, RuntimeStatistics, StatisticsContainer};
+use openbsw_runtime::{
+    Clock, ContextEntry, RuntimeMonitor, RuntimeStatistics, StatisticsContainer,
+};
 
 use crate::ASYNC_ADAPTER;
 use crate::config::{ISR_GROUP_COUNT, ISR_GROUP_NAMES, TASK_COUNT};
 
+/// The monitor's clock, `getSystemTicks32Bit`.
+pub struct SystemTicks;
+
+impl Clock for SystemTicks {
+    #[inline]
+    fn ticks() -> u32 {
+        system_ticks32()
+    }
+}
+
 /// `AsyncBinding::RuntimeMonitorType`: run time statistics for contexts and functions alike.
-pub type RuntimeMonitorType = RuntimeMonitor<RuntimeStatistics, RuntimeStatistics, LockType>;
+pub type RuntimeMonitorType =
+    RuntimeMonitor<RuntimeStatistics, RuntimeStatistics, LockType, SystemTicks>;
 type Entry = ContextEntry<RuntimeStatistics, RuntimeStatistics>;
 
 static TASK_ENTRIES: [Entry; TASK_COUNT] =
@@ -35,7 +48,7 @@ static ISR_GROUP_STATISTICS: StatisticsContainer<Entry> =
     StatisticsContainer::new(&ISR_GROUP_ENTRIES, Some(&isr_group_name));
 /// The monitor the tracing hooks feed.
 pub static RUNTIME_MONITOR: RuntimeMonitorType =
-    RuntimeMonitor::new(&TASK_STATISTICS, &ISR_GROUP_STATISTICS, &system_ticks32);
+    RuntimeMonitor::new(&TASK_STATISTICS, &ISR_GROUP_STATISTICS);
 
 /// The port of `StaticContextHook<RuntimeMonitorType>`.
 struct MonitorHook;

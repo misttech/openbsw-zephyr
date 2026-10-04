@@ -225,6 +225,11 @@ pub(crate) fn reboot_cold() -> ! {
     panic!("reboot requested");
 }
 
+pub(crate) fn cycle_get_32() -> u32 {
+    // The low half of the 64-bit count, which is what `k_cycle_get_32` returns.
+    hooks().cycle_get_64() as u32
+}
+
 pub(crate) fn cycle_get_64() -> u64 {
     hooks().cycle_get_64()
 }

@@ -185,6 +185,10 @@ void cpp_timer_stop(uint32_t context) { k_timer_stop(&timers[context]); }
 
 uint32_t cpp_irq_lock(void) { return irq_lock(); }
 void cpp_irq_unlock(uint32_t key) { irq_unlock(key); }
+#if defined(CONFIG_ARMV7_M_ARMV8_M_MAINLINE)
+// zephyr-ffi inlines irq_lock on these cores with this BASEPRI value (IRQ_LOCK_BASEPRI).
+BUILD_ASSERT(_EXC_IRQ_DEFAULT_PRIO == 0x10, "update IRQ_LOCK_BASEPRI in zephyr-ffi");
+#endif
 bool cpp_is_in_isr(void) { return k_is_in_isr(); }
 int32_t cpp_current_priority(void) { return k_thread_priority_get(k_current_get()); }
 // k_current_get() may read a stale thread pointer inside the switch hooks.
@@ -200,6 +204,7 @@ void cpp_reboot_cold(void)
 
 // Time
 
+uint32_t cpp_cycle_get_32(void) { return k_cycle_get_32(); }
 uint64_t cpp_cycle_get_64(void) { return k_cycle_get_64(); }
 uint32_t cpp_cyc_to_us_floor32(uint64_t cycles) { return k_cyc_to_us_floor32(cycles); }
 uint64_t cpp_cyc_to_us_floor64(uint64_t cycles) { return k_cyc_to_us_floor64(cycles); }

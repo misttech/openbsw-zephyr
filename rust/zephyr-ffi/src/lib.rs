@@ -117,11 +117,13 @@ pub fn timer_stop(context: u32) {
 }
 
 /// Lock interrupts; returns the key for [`irq_unlock`].
+#[inline]
 pub fn irq_lock() -> u32 {
     imp::irq_lock()
 }
 
 /// Unlock interrupts with the key from [`irq_lock`].
+#[inline]
 pub fn irq_unlock(key: u32) {
     imp::irq_unlock(key);
 }
@@ -150,6 +152,11 @@ pub fn msleep(milliseconds: i32) {
 /// Reboot the system (`SYS_REBOOT_COLD`).
 pub fn reboot_cold() -> ! {
     imp::reboot_cold()
+}
+
+/// The low 32 bits of the free-running cycle counter, as `k_cycle_get_32` reads them.
+pub fn cycle_get_32() -> u32 {
+    imp::cycle_get_32()
 }
 
 /// The free-running cycle counter.
