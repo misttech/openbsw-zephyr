@@ -21,7 +21,7 @@ pub fn system_time_ns() -> u64 {
 
 /// The cycle counter, truncated to 32 bits (`getSystemTicks32Bit`).
 pub fn system_ticks32() -> u32 {
-    zephyr_ffi::cycle_get_64() as u32
+    zephyr_ffi::cycle_get_32()
 }
 
 /// Cycles to nanoseconds (`systemTicksToTimeNs`).
